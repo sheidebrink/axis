@@ -64,6 +64,12 @@ export const Workspace: React.FC = () => {
       window.electron.onToggleCommandPalette(() => {
         setPaletteOpen(prev => !prev);
       });
+
+      window.electron.onResetLayout(() => {
+        const role = workspaceContext.get('userRole') || 'default';
+        localStorage.removeItem(`axis-layout-${role}`);
+        window.location.reload();
+      });
     }
 
     restoreLayout();
@@ -203,6 +209,14 @@ export const Workspace: React.FC = () => {
               config={props.params.config}
               panelId={props.api.id}
             />
+          ),
+        }}
+        tabComponents={{
+          tab: (props) => (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {props.params.config.icon && <span>{props.params.config.icon}</span>}
+              <span>{props.params.config.title}</span>
+            </div>
           ),
         }}
         className="dockview-theme-dark"

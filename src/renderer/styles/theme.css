@@ -1,0 +1,134 @@
+/* Global Theme */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #1e1e1e;
+  color: #e0e0e0;
+  overflow: hidden;
+}
+
+/* Buttons */
+button {
+  font-family: inherit;
+  padding: 8px 16px;
+  background: #0e639c;
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #1177bb;
+}
+
+button:active {
+  background: #0a4d7a;
+}
+
+button:disabled {
+  background: #444;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Inputs */
+input, textarea {
+  font-family: inherit;
+  padding: 8px 12px;
+  background: #2d2d2d;
+  border: 1px solid #444;
+  color: #e0e0e0;
+  font-size: 13px;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus, textarea:focus {
+  border-color: #0e639c;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #888;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 6px;
+  border: 2px solid #1e1e1e;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Dockview Theme Overrides */
+.dockview-theme-dark {
+  --dv-activegroup-visiblepanel-tab-background-color: #094771;
+  --dv-tabs-and-actions-container-font-size: 13px;
+  --dv-tabs-and-actions-container-height: 35px;
+  --dv-activegroup-visiblepanel-tab-color: #fff;
+  --dv-group-view-background-color: #1e1e1e;
+  --dv-tabs-container-scrollbar-color: #444;
+  --dv-separator-border: #333;
+}
+
+.dockview-theme-dark .tab {
+  padding: 8px 16px;
+  border-radius: 4px 4px 0 0;
+  transition: background 0.2s;
+}
+
+.dockview-theme-dark .tab:hover {
+  background: #2d2d2d;
+}
+
+/* Selection */
+::selection {
+  background: #0e639c;
+  color: #fff;
+}
+
+/* Links */
+a {
+  color: #4da6ff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Headers */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+  color: #fff;
+}
+
+h1 { font-size: 28px; }
+h2 { font-size: 24px; }
+h3 { font-size: 20px; }
+h4 { font-size: 16px; }
+h5 { font-size: 14px; }
+h6 { font-size: 12px; }

@@ -51,6 +51,7 @@ export async function initializeAxis() {
     type: 'native',
     component: 'email',
     title: 'Email',
+    icon: '📧',
     capabilities: {
       canReadContext: true,
       canWriteContext: false,
@@ -65,6 +66,7 @@ export async function initializeAxis() {
     type: 'native',
     component: 'browser',
     title: 'Browser',
+    icon: '🌐',
     capabilities: {
       canReadContext: true,
       canWriteContext: false,

@@ -4,6 +4,7 @@ interface Tab {
   id: string;
   title: string;
   url: string;
+  favicon?: string;
 }
 
 interface BrowserPanelProps {
@@ -44,6 +45,10 @@ const BrowserPanel: React.FC<BrowserPanelProps> = ({ config }) => {
     setTabs(tabs.map(t => t.id === tabId ? { ...t, title } : t));
   };
 
+  const updateTabFavicon = (tabId: string, favicon: string) => {
+    setTabs(tabs.map(t => t.id === tabId ? { ...t, favicon } : t));
+  };
+
   return (
     <div style={styles.container}>
       <div style={styles.tabBar}>
@@ -57,6 +62,11 @@ const BrowserPanel: React.FC<BrowserPanelProps> = ({ config }) => {
               }}
               onClick={() => setActiveTabId(tab.id)}
             >
+              {tab.favicon ? (
+                <img src={tab.favicon} style={styles.favicon} alt="" />
+              ) : (
+                <span style={styles.defaultIcon}>🌐</span>
+              )}
               <span style={styles.tabTitle}>{tab.title}</span>
               {tabs.length > 1 && (
                 <button
@@ -97,6 +107,11 @@ const BrowserPanel: React.FC<BrowserPanelProps> = ({ config }) => {
               border: 'none',
             }}
             onPageTitleUpdated={(e: any) => updateTabTitle(tab.id, e.title)}
+            onPageFaviconUpdated={(e: any) => {
+              if (e.favicons && e.favicons.length > 0) {
+                updateTabFavicon(tab.id, e.favicons[0]);
+              }
+            }}
           />
         ))}
       </div>
@@ -149,6 +164,15 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+  },
+  favicon: {
+    width: 16,
+    height: 16,
+    flexShrink: 0,
+  },
+  defaultIcon: {
+    fontSize: 16,
+    flexShrink: 0,
   },
   closeButton: {
     background: 'none',

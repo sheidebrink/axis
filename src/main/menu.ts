@@ -48,6 +48,13 @@ export function createApplicationMenu(mainWindow: BrowserWindow) {
           },
         },
         { type: 'separator' },
+        {
+          label: 'Reset Layout',
+          click: () => {
+            mainWindow.webContents.send('reset-layout');
+          },
+        },
+        { type: 'separator' },
         { role: 'reload' },
         { role: 'toggleDevTools' },
       ],
