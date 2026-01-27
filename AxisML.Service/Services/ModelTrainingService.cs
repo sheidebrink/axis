@@ -48,11 +48,15 @@ public class ModelTrainingService
                 .Append(_mlContext.Transforms.Text.FeaturizeText("BodyFeatures", nameof(EmailData.Body)))
                 .Append(_mlContext.Transforms.Concatenate("Features", "SubjectFeatures", "BodyFeatures"));
 
-            // Save timestamp for model versioning
+            // Fit the model
+            var model = priorityPipeline.Fit(dataView);
+
+            // Save model with timestamp
             var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
             var modelPath = Path.Combine(_modelsPath, $"{SanitizeEmail(userEmail)}_{timestamp}.zip");
+            _mlContext.Model.Save(model, dataView.Schema, modelPath);
             
-            Console.WriteLine($"Models trained successfully. Version: {timestamp}");
+            Console.WriteLine($"Models trained and saved: {modelPath}");
             File.WriteAllText(Path.Combine(_modelsPath, $"{SanitizeEmail(userEmail)}_latest.txt"), timestamp);
 
             return true;
