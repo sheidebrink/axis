@@ -24,7 +24,44 @@ export interface EmailInsights {
 }
 
 class AIInsightsService {
+  private readonly mlServiceUrl = 'http://localhost:5000/api/ml';
+
   async analyzeEmail(emailId: string, subject: string, body: string, from: string): Promise<EmailInsights> {
+    try {
+      // Try ML service first
+      const response = await fetch(`${this.mlServiceUrl}/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emailId, subject, body, from }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return this.mapMLResponse(data);
+      }
+    } catch (err) {
+      console.warn('ML service unavailable, using fallback:', err);
+    }
+
+    // Fallback to mock analysis
+    return this.mockAnalyze(emailId, subject, body, from);
+  }
+
+  private mapMLResponse(data: any): EmailInsights {
+    return {
+      emailId: data.emailId,
+      priorityScore: data.priorityScore,
+      category: data.category,
+      sentiment: data.sentiment,
+      entities: data.entities,
+      similarClaims: data.similarClaims,
+      recommendations: data.recommendations,
+      predictedCloseDays: data.predictedCloseDays,
+      fraudIndicators: data.fraudIndicators,
+    };
+  }
+
+  private mockAnalyze(emailId: string, subject: string, body: string, from: string): EmailInsights {
     // Mock analysis - replace with ML.NET service call later
     const hasAttorney = body.toLowerCase().includes('attorney') || body.toLowerCase().includes('lawyer');
     const hasUrgent = subject.toLowerCase().includes('urgent') || body.toLowerCase().includes('urgent');
