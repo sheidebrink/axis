@@ -13,45 +13,14 @@ export function createApplicationMenu(mainWindow: BrowserWindow) {
       ],
     },
     {
-      label: 'Panels',
+      label: 'Email',
       submenu: [
         {
-          label: 'Email',
+          label: 'Open',
           accelerator: 'CmdOrCtrl+E',
           click: () => {
             console.log('Menu: Email clicked');
             mainWindow.webContents.send('open-panel', 'native-email');
-          },
-        },
-        {
-          label: 'Chat',
-          click: () => {
-            mainWindow.webContents.send('open-panel', 'native-chat');
-          },
-        },
-        {
-          label: 'Stats',
-          click: () => {
-            mainWindow.webContents.send('open-panel', 'native-stats');
-          },
-        },
-        {
-          label: 'Notes',
-          click: () => {
-            mainWindow.webContents.send('open-panel', 'native-notes');
-          },
-        },
-        { type: 'separator' },
-        {
-          label: 'Salesforce',
-          click: () => {
-            mainWindow.webContents.send('open-panel', 'vendor-salesforce');
-          },
-        },
-        {
-          label: 'Zendesk',
-          click: () => {
-            mainWindow.webContents.send('open-panel', 'vendor-zendesk');
           },
         },
       ],

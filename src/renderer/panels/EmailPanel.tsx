@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { emailService, EmailMessage } from '../services/email-service';
+import { EmailStats } from '../components/EmailStats';
 
 interface EmailPanelProps {
   panelId: string;
   config: any;
 }
 
-type View = 'inbox' | 'compose' | 'reply';
+type View = 'inbox' | 'compose' | 'reply' | 'stats';
 
 const EmailPanel: React.FC<EmailPanelProps> = ({ panelId }) => {
   const [messages, setMessages] = useState<EmailMessage[]>([]);
@@ -115,6 +116,7 @@ const EmailPanel: React.FC<EmailPanelProps> = ({ panelId }) => {
           <h3>Inbox</h3>
           <div style={styles.headerButtons}>
             <button onClick={handleCompose}>Compose</button>
+            <button onClick={() => setView('stats')}>Stats</button>
             <button onClick={loadMessages}>Refresh</button>
           </div>
         </div>
@@ -198,6 +200,16 @@ const EmailPanel: React.FC<EmailPanelProps> = ({ panelId }) => {
               {sending ? 'Sending...' : 'Send'}
             </button>
           </div>
+        </div>
+      )}
+
+      {view === 'stats' && (
+        <div style={styles.statsPanel}>
+          <div style={styles.statsHeader}>
+            <h3>Email Statistics</h3>
+            <button onClick={() => setView('inbox')}>Back to Inbox</button>
+          </div>
+          <EmailStats />
         </div>
       )}
     </div>
@@ -335,6 +347,19 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 14,
     borderRadius: 4,
     cursor: 'pointer',
+  },
+  statsPanel: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  statsHeader: {
+    padding: 24,
+    paddingBottom: 12,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottom: '1px solid #333',
   },
   loading: {
     display: 'flex',

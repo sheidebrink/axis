@@ -34,6 +34,9 @@ contextBridge.exposeInMainWorld('electron', {
   
   o365SendMessage: (userEmail: string, to: string, subject: string, body: string) => 
     ipcRenderer.invoke('o365-send-message', userEmail, to, subject, body),
+  
+  o365CalculateStats: (userEmail: string) => 
+    ipcRenderer.invoke('o365-calculate-stats', userEmail),
 });
 
 declare global {
@@ -49,6 +52,7 @@ declare global {
       o365MarkRead: (userEmail: string, messageId: string) => Promise<void>;
       o365SendReply: (userEmail: string, messageId: string, comment: string) => Promise<void>;
       o365SendMessage: (userEmail: string, to: string, subject: string, body: string) => Promise<void>;
+      o365CalculateStats: (userEmail: string) => Promise<any>;
     };
   }
 }
