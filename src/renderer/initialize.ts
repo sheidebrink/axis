@@ -74,6 +74,19 @@ export async function initializeAxis() {
     },
   });
 
+  panelRegistry.register({
+    id: 'native-email',
+    type: 'native',
+    component: 'email',
+    title: 'Email',
+    capabilities: {
+      canReadContext: true,
+      canWriteContext: false,
+      canEmitEvents: true,
+      canReceiveEvents: true,
+    },
+  });
+
   // Register plugins
   await pluginManager.register(analyticsManifest);
 }

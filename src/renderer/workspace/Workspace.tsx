@@ -11,14 +11,16 @@ import { workspaceContext } from '../context/workspace-context';
 import { SerializedLayout } from '../shared/types';
 
 export const Workspace: React.FC = () => {
-  const dockviewRef = useRef<DockviewReact>(null);
+  const dockviewRef = useRef<DockviewReadyEvent | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
 
   useEffect(() => {
+    console.log('isReady changed:', isReady);
     if (!isReady) return;
 
     const api = dockviewRef.current?.api;
+    console.log('Dockview API:', api);
     if (!api) return;
 
     registerBuiltInCommands(api);
@@ -42,6 +44,24 @@ export const Workspace: React.FC = () => {
         });
       }
     });
+
+    // Menu IPC listeners - set up after initialization
+    if (window.electron) {
+      window.electron.onOpenPanel((panelId) => {
+        console.log('Opening panel:', panelId);
+        const config = panelRegistry.get(panelId);
+        console.log('Config found:', config);
+        if (config) {
+          const newPanel = { ...config, id: `${config.id}-${Date.now()}` };
+          console.log('Adding panel:', newPanel);
+          addPanel(newPanel);
+        }
+      });
+
+      window.electron.onToggleCommandPalette(() => {
+        setPaletteOpen(prev => !prev);
+      });
+    }
 
     restoreLayout();
 
@@ -91,11 +111,14 @@ export const Workspace: React.FC = () => {
   }, []);
 
   const onReady = (event: DockviewReadyEvent) => {
+    console.log('Dockview ready!');
+    dockviewRef.current = event;
     setIsReady(true);
   };
 
   const addPanel = (config: any) => {
     const api = dockviewRef.current?.api;
+    console.log('addPanel called, api:', !!api, 'config:', config);
     if (!api) return;
 
     api.addPanel({
@@ -104,6 +127,7 @@ export const Workspace: React.FC = () => {
       params: { config },
       title: config.title,
     });
+    console.log('Panel added to dockview');
   };
 
   const saveLayout = () => {
@@ -143,10 +167,16 @@ export const Workspace: React.FC = () => {
 
       api.fromJSON(layout.layout);
     } else {
-      // Apply role-based preset
+      // Apply role-based preset or default panels
       const preset = layoutPresetManager.getPresetForRole(role);
       if (preset) {
         layoutPresetManager.applyPreset(preset, dockviewRef.current?.api, panelRegistry);
+      } else {
+        // Default: add email panel
+        const emailConfig = panelRegistry.get('native-email');
+        if (emailConfig) {
+          addPanel(emailConfig);
+        }
       }
     }
   };
@@ -163,7 +193,6 @@ export const Workspace: React.FC = () => {
   return (
     <>
       <DockviewReact
-        ref={dockviewRef}
         onReady={onReady}
         components={{
           panelRenderer: (props) => (

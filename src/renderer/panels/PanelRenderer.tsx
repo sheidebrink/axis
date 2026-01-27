@@ -7,6 +7,7 @@ const nativeComponents: Record<string, React.LazyExoticComponent<any>> = {
   chat: lazy(() => import('./ChatPanel')),
   stats: lazy(() => import('./StatsPanel')),
   notes: lazy(() => import('./NotesPanel')),
+  email: lazy(() => import('./EmailPanel')),
 };
 
 interface PanelRendererProps {
@@ -43,6 +44,7 @@ const PluginPanel: React.FC<{ config: PanelConfig; panelId: string }> = ({ confi
   if (config.type !== 'plugin') return null;
 
   const Component = lazy(() => 
+    /* @vite-ignore */
     import(`../../plugins/${config.pluginId}/${config.entryPoint}`)
   );
 

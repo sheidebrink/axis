@@ -1,6 +1,9 @@
 import { app, BrowserWindow } from 'electron';
 import { join } from 'path';
+import { readFileSync, existsSync } from 'fs';
 import { setupWindowInterception } from './window-interception';
+import { createApplicationMenu } from './menu';
+import { setupO365Auth } from './o365-handler';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -17,6 +20,16 @@ app.whenReady().then(() => {
   });
 
   setupWindowInterception(mainWindow);
+  createApplicationMenu(mainWindow);
+  
+  // Load O365 config from settings.json
+  const settingsPath = join(process.cwd(), 'settings.json');
+  if (existsSync(settingsPath)) {
+    const settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
+    if (settings.vendors?.O365) {
+      setupO365Auth(settings.vendors.O365);
+    }
+  }
 
   if (process.env.NODE_ENV === 'development') {
     mainWindow.loadURL('http://localhost:5173');
