@@ -76,6 +76,21 @@ export async function initializeAxis() {
     metadata: { defaultUrl: cbcsUrl },
   });
 
+  // Register AI Insights panel
+  panelRegistry.register({
+    id: 'native-ai-insights',
+    type: 'native',
+    component: 'aiInsights',
+    title: 'AI Insights',
+    icon: '🤖',
+    capabilities: {
+      canReadContext: true,
+      canWriteContext: false,
+      canEmitEvents: false,
+      canReceiveEvents: false,
+    },
+  });
+
   // Register plugins
   await pluginManager.register(analyticsManifest);
 }

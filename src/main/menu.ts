@@ -35,6 +35,13 @@ export function createApplicationMenu(mainWindow: BrowserWindow) {
             mainWindow.webContents.send('open-panel', 'native-email');
           },
         },
+        {
+          label: 'AI Insights',
+          accelerator: 'CmdOrCtrl+I',
+          click: () => {
+            mainWindow.webContents.send('open-panel', 'native-ai-insights');
+          },
+        },
       ],
     },
     {
