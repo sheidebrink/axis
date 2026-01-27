@@ -1,0 +1,28 @@
+{
+  "environment": "development",
+  "api": {
+    "baseUrl": "http://localhost:3000",
+    "apiKey": "your-api-key-here"
+  },
+  "vendors": {
+    "salesforce": {
+      "url": "https://test.salesforce.com",
+      "clientId": "your-salesforce-client-id",
+      "clientSecret": "your-salesforce-client-secret"
+    },
+    "zendesk": {
+      "url": "https://sandbox.zendesk.com",
+      "apiToken": "your-zendesk-token"
+    },
+    "O365": {
+      "enabled": true,
+      "appId": "your-app-id-here",
+      "clientSecret": "your-client-secret-here",
+      "tenantId": "your-tenant-id-here"
+    }
+  },
+  "features": {
+    "enableAnalytics": true,
+    "enableDebugTools": true
+  }
+}
