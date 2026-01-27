@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'path';
 import { readFileSync, existsSync } from 'fs';
 import { setupWindowInterception } from './window-interception';
@@ -6,6 +6,14 @@ import { createApplicationMenu } from './menu';
 import { setupO365Auth } from './o365-handler';
 
 let mainWindow: BrowserWindow | null = null;
+
+function getCbcsUrl(): string {
+  const env = process.env.AXIS_ENV || process.env.NODE_ENV || 'development';
+  if (env === 'production') {
+    return 'https://cbcs.ventivclient.com/ivos/login.jsp';
+  }
+  return 'https://test-cbcs.ventivclient.com/ivos/login.jsp';
+}
 
 app.whenReady().then(() => {
   mainWindow = new BrowserWindow({
@@ -30,6 +38,9 @@ app.whenReady().then(() => {
       setupO365Auth(settings.vendors.O365);
     }
   }
+
+  // Handle CBCS URL request
+  ipcMain.handle('get-cbcs-url', () => getCbcsUrl());
 
   if (process.env.NODE_ENV === 'development') {
     mainWindow.loadURL('http://localhost:5173');

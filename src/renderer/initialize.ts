@@ -3,36 +3,8 @@ import { pluginManager } from './plugins/plugin-manager';
 import analyticsManifest from '../plugins/analytics/manifest';
 
 export async function initializeAxis() {
-  // Register vendor webview panels
-  panelRegistry.register({
-    id: 'vendor-salesforce',
-    type: 'webview',
-    title: 'Salesforce',
-    url: 'https://salesforce.com',
-    partition: 'persist:salesforce',
-    capabilities: {
-      canReadContext: true,
-      canWriteContext: true,
-      canEmitEvents: true,
-      canReceiveEvents: false,
-    },
-    metadata: { vendor: 'salesforce' },
-  });
-
-  panelRegistry.register({
-    id: 'vendor-zendesk',
-    type: 'webview',
-    title: 'Zendesk',
-    url: 'https://zendesk.com',
-    partition: 'persist:zendesk',
-    capabilities: {
-      canReadContext: true,
-      canWriteContext: true,
-      canEmitEvents: true,
-      canReceiveEvents: false,
-    },
-    metadata: { vendor: 'zendesk' },
-  });
+  // Get CBCS URL from main process
+  const cbcsUrl = await window.electron.getCbcsUrl();
 
   // Register native panels
   panelRegistry.register({
@@ -85,6 +57,21 @@ export async function initializeAxis() {
       canEmitEvents: true,
       canReceiveEvents: true,
     },
+  });
+
+  // Register browser panel with environment-specific CBCS URL
+  panelRegistry.register({
+    id: 'native-browser',
+    type: 'native',
+    component: 'browser',
+    title: 'Browser',
+    capabilities: {
+      canReadContext: true,
+      canWriteContext: false,
+      canEmitEvents: false,
+      canReceiveEvents: false,
+    },
+    metadata: { defaultUrl: cbcsUrl },
   });
 
   // Register plugins

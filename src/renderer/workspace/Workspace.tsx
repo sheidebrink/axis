@@ -23,7 +23,10 @@ export const Workspace: React.FC = () => {
     console.log('Dockview API:', api);
     if (!api) return;
 
-    registerBuiltInCommands(api);
+    // Wait a bit for panel registry to be populated
+    setTimeout(() => {
+      registerBuiltInCommands(api);
+    }, 100);
 
     // Track panel focus
     const disposable = api.onDidActivePanelChange((panel) => {
@@ -172,10 +175,10 @@ export const Workspace: React.FC = () => {
       if (preset) {
         layoutPresetManager.applyPreset(preset, dockviewRef.current?.api, panelRegistry);
       } else {
-        // Default: add email panel
-        const emailConfig = panelRegistry.get('native-email');
-        if (emailConfig) {
-          addPanel(emailConfig);
+        // Default: add browser panel
+        const browserConfig = panelRegistry.get('native-browser');
+        if (browserConfig) {
+          addPanel(browserConfig);
         }
       }
     }

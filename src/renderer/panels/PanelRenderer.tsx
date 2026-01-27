@@ -8,6 +8,7 @@ const nativeComponents: Record<string, React.LazyExoticComponent<any>> = {
   stats: lazy(() => import('./StatsPanel')),
   notes: lazy(() => import('./NotesPanel')),
   email: lazy(() => import('./EmailPanel')),
+  browser: lazy(() => import('./BrowserPanel')),
 };
 
 interface PanelRendererProps {

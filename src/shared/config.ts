@@ -7,6 +7,7 @@ interface EnvironmentConfig {
     salesforce: string;
     zendesk: string;
   };
+  cbcsUrl: string;
   features: {
     enableAnalytics: boolean;
     enableDebugTools: boolean;
@@ -21,6 +22,7 @@ const configs: Record<Environment, EnvironmentConfig> = {
       salesforce: 'https://test.salesforce.com',
       zendesk: 'https://sandbox.zendesk.com',
     },
+    cbcsUrl: 'https://test-cbcs.ventivclient.com/ivos/login.jsp',
     features: {
       enableAnalytics: true,
       enableDebugTools: true,
@@ -33,6 +35,7 @@ const configs: Record<Environment, EnvironmentConfig> = {
       salesforce: 'https://test.salesforce.com',
       zendesk: 'https://qa.zendesk.com',
     },
+    cbcsUrl: 'https://test-cbcs.ventivclient.com/ivos/login.jsp',
     features: {
       enableAnalytics: true,
       enableDebugTools: true,
@@ -45,6 +48,7 @@ const configs: Record<Environment, EnvironmentConfig> = {
       salesforce: 'https://login.salesforce.com',
       zendesk: 'https://yourcompany.zendesk.com',
     },
+    cbcsUrl: 'https://cbcs.ventivclient.com/ivos/login.jsp',
     features: {
       enableAnalytics: true,
       enableDebugTools: false,

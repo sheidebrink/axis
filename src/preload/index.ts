@@ -19,6 +19,8 @@ contextBridge.exposeInMainWorld('electron', {
     ipcRenderer.on('toggle-command-palette', () => callback());
   },
 
+  getCbcsUrl: () => ipcRenderer.invoke('get-cbcs-url'),
+
   // O365 API
   o365GetMessages: (userEmail: string, top: number) => 
     ipcRenderer.invoke('o365-get-messages', userEmail, top),
@@ -47,6 +49,7 @@ declare global {
       onCreatePanelFromUrl: (callback: (data: any) => void) => void;
       onOpenPanel: (callback: (panelId: string) => void) => void;
       onToggleCommandPalette: (callback: () => void) => void;
+      getCbcsUrl: () => Promise<string>;
       o365GetMessages: (userEmail: string, top: number) => Promise<any>;
       o365GetMessage: (userEmail: string, messageId: string) => Promise<any>;
       o365MarkRead: (userEmail: string, messageId: string) => Promise<void>;

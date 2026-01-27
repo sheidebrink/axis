@@ -13,6 +13,18 @@ export function createApplicationMenu(mainWindow: BrowserWindow) {
       ],
     },
     {
+      label: 'Browser',
+      submenu: [
+        {
+          label: 'Open',
+          accelerator: 'CmdOrCtrl+B',
+          click: () => {
+            mainWindow.webContents.send('open-panel', 'native-browser');
+          },
+        },
+      ],
+    },
+    {
       label: 'Email',
       submenu: [
         {
