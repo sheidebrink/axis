@@ -33,6 +33,20 @@ public class TrainingDataContext
             )";
         command.ExecuteNonQuery();
 
+        // Create UserFeedback table for human corrections
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS UserFeedback (
+                EmailId TEXT PRIMARY KEY,
+                UserEmail TEXT NOT NULL,
+                AssignedPriority TEXT,
+                AssignedCategory TEXT,
+                AssignedSentiment TEXT,
+                NeedsResponseToday INTEGER DEFAULT 0,
+                SnoozedUntil TEXT,
+                FeedbackDate TEXT NOT NULL
+            )";
+        command.ExecuteNonQuery();
+
         // Create index on UserEmail for faster queries
         command.CommandText = "CREATE INDEX IF NOT EXISTS idx_user_email ON EmailTrainingData(UserEmail)";
         command.ExecuteNonQuery();
@@ -146,5 +160,54 @@ public class TrainingDataContext
         command.Parameters.AddWithValue("$userEmail", userEmail);
         
         return Convert.ToInt32(command.ExecuteScalar());
+    }
+
+    public void SaveUserFeedback(string emailId, string userEmail, string? priority = null, string? category = null, string? sentiment = null, bool? needsResponse = null, DateTime? snoozedUntil = null)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+            INSERT OR REPLACE INTO UserFeedback 
+            (EmailId, UserEmail, AssignedPriority, AssignedCategory, AssignedSentiment, NeedsResponseToday, SnoozedUntil, FeedbackDate)
+            VALUES ($emailId, $userEmail, $priority, $category, $sentiment, $needsResponse, $snoozedUntil, $feedbackDate)";
+        
+        command.Parameters.AddWithValue("$emailId", emailId);
+        command.Parameters.AddWithValue("$userEmail", userEmail);
+        command.Parameters.AddWithValue("$priority", priority ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("$category", category ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("$sentiment", sentiment ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("$needsResponse", needsResponse.HasValue ? (needsResponse.Value ? 1 : 0) : (object)DBNull.Value);
+        command.Parameters.AddWithValue("$snoozedUntil", snoozedUntil?.ToString("o") ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("$feedbackDate", DateTime.UtcNow.ToString("o"));
+        
+        command.ExecuteNonQuery();
+    }
+
+    public Dictionary<string, (string? Priority, string? Category, string? Sentiment, bool NeedsResponse, DateTime? SnoozedUntil)> GetUserFeedback(string userEmail)
+    {
+        var feedback = new Dictionary<string, (string?, string?, string?, bool, DateTime?)>();
+        
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+
+        var command = connection.CreateCommand();
+        command.CommandText = "SELECT EmailId, AssignedPriority, AssignedCategory, AssignedSentiment, NeedsResponseToday, SnoozedUntil FROM UserFeedback WHERE UserEmail = $userEmail";
+        command.Parameters.AddWithValue("$userEmail", userEmail);
+        
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            feedback[reader.GetString(0)] = (
+                reader.IsDBNull(1) ? null : reader.GetString(1),
+                reader.IsDBNull(2) ? null : reader.GetString(2),
+                reader.IsDBNull(3) ? null : reader.GetString(3),
+                !reader.IsDBNull(4) && reader.GetInt32(4) == 1,
+                reader.IsDBNull(5) ? null : DateTime.Parse(reader.GetString(5))
+            );
+        }
+
+        return feedback;
     }
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { emailService, EmailMessage } from '../services/email-service';
+import { feedbackService } from '../services/feedback-service';
 import { EmailStats } from '../components/EmailStats';
 
 interface EmailPanelProps {
@@ -22,6 +23,16 @@ const EmailPanel: React.FC<EmailPanelProps> = ({ panelId }) => {
   const [composeSubject, setComposeSubject] = useState('');
   const [composeBody, setComposeBody] = useState('');
   const [sending, setSending] = useState(false);
+  const [selectedPriority, setSelectedPriority] = useState<Record<string, string>>({});
+
+  const handleSetPriority = async (messageId: string, priority: 'High' | 'Medium' | 'Low') => {
+    try {
+      await feedbackService.setPriority(messageId, priority);
+      setSelectedPriority(prev => ({ ...prev, [messageId]: priority }));
+    } catch (err) {
+      console.error('Failed to set priority:', err);
+    }
+  };
 
   useEffect(() => {
     loadMessages();
@@ -147,7 +158,27 @@ const EmailPanel: React.FC<EmailPanelProps> = ({ panelId }) => {
         <div style={styles.messageDetail}>
           <div style={styles.messageDetailHeader}>
             <h3>{fullMessage.subject}</h3>
-            <button onClick={handleReply}>Reply</button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button 
+                style={{ ...styles.priorityButton, ...(selectedPriority[fullMessage.id] === 'High' ? styles.priorityHigh : {}) }}
+                onClick={() => handleSetPriority(fullMessage.id, 'High')}
+              >
+                🔴 High
+              </button>
+              <button 
+                style={{ ...styles.priorityButton, ...(selectedPriority[fullMessage.id] === 'Medium' ? styles.priorityMedium : {}) }}
+                onClick={() => handleSetPriority(fullMessage.id, 'Medium')}
+              >
+                🟡 Medium
+              </button>
+              <button 
+                style={{ ...styles.priorityButton, ...(selectedPriority[fullMessage.id] === 'Low' ? styles.priorityLow : {}) }}
+                onClick={() => handleSetPriority(fullMessage.id, 'Low')}
+              >
+                🟢 Low
+              </button>
+              <button onClick={handleReply}>Reply</button>
+            </div>
           </div>
           <div style={styles.messageDetailMeta}>
             <div>From: {fullMessage.from}</div>
@@ -376,6 +407,27 @@ const styles: Record<string, React.CSSProperties> = {
     height: '100%',
     color: '#f44',
     gap: 16,
+  },
+  priorityButton: {
+    padding: '6px 12px',
+    background: '#2d2d2d',
+    border: '1px solid #444',
+    color: '#fff',
+    fontSize: 12,
+    borderRadius: 4,
+    cursor: 'pointer',
+  },
+  priorityHigh: {
+    background: '#f44',
+    borderColor: '#f44',
+  },
+  priorityMedium: {
+    background: '#fa0',
+    borderColor: '#fa0',
+  },
+  priorityLow: {
+    background: '#4a4',
+    borderColor: '#4a4',
   },
 };
 

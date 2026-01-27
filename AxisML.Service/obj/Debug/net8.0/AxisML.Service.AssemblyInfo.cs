@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AxisML.Service")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f5f9a5297d8ed6bc8786417aa88a4349cdb0ee51")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+40ba4febc746dad6ff865c7c5666964e6ddb02f9")]
 [assembly: System.Reflection.AssemblyProductAttribute("AxisML.Service")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AxisML.Service")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
