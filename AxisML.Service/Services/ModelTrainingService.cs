@@ -31,32 +31,38 @@ public class ModelTrainingService
 
         try
         {
-            var emails = _dataContext.GetAllEmails(userEmail);
-            var trainingData = emails.Select(e => new EmailData
+            var emails = _dataContext.GetAllEmailsWithLabels(userEmail);
+            var trainingData = emails.Where(e => e.Priority.HasValue).Select(e => new EmailTrainingData
             {
                 Subject = e.Subject,
                 Body = e.Body,
-                From = e.From
+                Priority = e.Priority!.Value
             }).ToList();
+
+            if (trainingData.Count < 50)
+            {
+                Console.WriteLine($"Not enough labeled data: {trainingData.Count}");
+                return false;
+            }
 
             var dataView = _mlContext.Data.LoadFromEnumerable(trainingData);
 
-            // Train priority model (simplified - would use AutoML in production)
-            Console.WriteLine("Training priority model...");
-            var priorityPipeline = _mlContext.Transforms.Text
-                .FeaturizeText("SubjectFeatures", nameof(EmailData.Subject))
-                .Append(_mlContext.Transforms.Text.FeaturizeText("BodyFeatures", nameof(EmailData.Body)))
-                .Append(_mlContext.Transforms.Concatenate("Features", "SubjectFeatures", "BodyFeatures"));
+            // Train priority regression model
+            Console.WriteLine("Training priority regression model...");
+            var pipeline = _mlContext.Transforms.Text
+                .FeaturizeText("SubjectFeatures", nameof(EmailTrainingData.Subject))
+                .Append(_mlContext.Transforms.Text.FeaturizeText("BodyFeatures", nameof(EmailTrainingData.Body)))
+                .Append(_mlContext.Transforms.Concatenate("Features", "SubjectFeatures", "BodyFeatures"))
+                .Append(_mlContext.Regression.Trainers.FastTree(labelColumnName: nameof(EmailTrainingData.Priority)));
 
-            // Fit the model
-            var model = priorityPipeline.Fit(dataView);
+            var model = pipeline.Fit(dataView);
 
-            // Save model with timestamp
+            // Save model
             var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
             var modelPath = Path.Combine(_modelsPath, $"{SanitizeEmail(userEmail)}_{timestamp}.zip");
             _mlContext.Model.Save(model, dataView.Schema, modelPath);
             
-            Console.WriteLine($"Models trained and saved: {modelPath}");
+            Console.WriteLine($"Model trained and saved: {modelPath}");
             File.WriteAllText(Path.Combine(_modelsPath, $"{SanitizeEmail(userEmail)}_latest.txt"), timestamp);
 
             return true;
@@ -66,6 +72,13 @@ public class ModelTrainingService
             Console.WriteLine($"Error training models: {ex.Message}");
             return false;
         }
+    }
+
+    private class EmailTrainingData
+    {
+        public string Subject { get; set; } = "";
+        public string Body { get; set; } = "";
+        public float Priority { get; set; }
     }
 
     public string GetLatestModelVersion(string userEmail)

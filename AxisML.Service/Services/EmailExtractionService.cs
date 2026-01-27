@@ -17,8 +17,8 @@ public class EmailExtractionService
         var tenantId = configuration["O365:TenantId"];
         var clientSecret = configuration["O365:ClientSecret"];
 
-        Console.WriteLine($"[EmailExtraction] ClientId: {clientId?.Substring(0, 8)}...");
-        Console.WriteLine($"[EmailExtraction] TenantId: {tenantId?.Substring(0, 8)}...");
+        Console.WriteLine($"[EmailExtraction] ClientId: {(string.IsNullOrEmpty(clientId) ? "MISSING" : clientId.Substring(0, Math.Min(8, clientId.Length)) + "...")}");
+        Console.WriteLine($"[EmailExtraction] TenantId: {(string.IsNullOrEmpty(tenantId) ? "MISSING" : tenantId.Substring(0, Math.Min(8, tenantId.Length)) + "...")}");
         Console.WriteLine($"[EmailExtraction] ClientSecret: {(string.IsNullOrEmpty(clientSecret) ? "MISSING" : "SET")}");
 
         var credential = new ClientSecretCredential(tenantId, clientId, clientSecret);

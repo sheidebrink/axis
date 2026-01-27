@@ -44,11 +44,36 @@ public class MLTrainingJobs
             var emails = await _extractionService.ExtractEmailsAsync(userEmail, maxEmails: 500);
             Console.WriteLine($"✓ Extracted {emails.Count} emails");
 
-            // Save to database
-            Console.WriteLine("Saving to database...");
+            // Save to database with auto-labels
+            Console.WriteLine("Saving to database with auto-generated labels...");
             foreach (var email in emails)
             {
-                _dataContext.SaveEmail(userEmail, email.Id, email.Subject, email.Body, email.From, email.Received);
+                // Generate labels using rule-based logic
+                var text = $"{email.Subject} {email.Body}".ToLower();
+                
+                float priority = 50;
+                if (text.Contains("attorney") || text.Contains("lawyer")) priority += 30;
+                if (text.Contains("urgent") || text.Contains("immediate")) priority += 20;
+                if (text.Contains("injury") || text.Contains("pain")) priority += 15;
+                priority = Math.Min(100, priority);
+
+                string category = "General";
+                if (text.Contains("injury") || text.Contains("pain") || text.Contains("medical"))
+                    category = "Medical";
+                else if (text.Contains("attorney") || text.Contains("lawyer"))
+                    category = "Legal";
+                else if (text.Contains("property") || text.Contains("damage"))
+                    category = "Property";
+
+                string sentiment = "neutral";
+                if (text.Contains("unacceptable") || text.Contains("frustrated"))
+                    sentiment = "escalating";
+                else if (text.Contains("attorney") || text.Contains("urgent"))
+                    sentiment = "concerned";
+                else if (text.Contains("thank") || text.Contains("appreciate"))
+                    sentiment = "calm";
+
+                _dataContext.SaveEmail(userEmail, email.Id, email.Subject, email.Body, email.From, email.Received, priority, category, sentiment);
             }
 
             var totalEmails = _dataContext.GetEmailCount(userEmail);

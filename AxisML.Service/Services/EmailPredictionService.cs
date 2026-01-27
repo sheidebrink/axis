@@ -84,10 +84,40 @@ public class EmailPredictionService
 
     private EmailPrediction PredictWithModel(EmailInsightsRequest request, ITransformer model)
     {
-        // For now, still use rule-based until we implement actual ML prediction
-        // This is where you'd use model.Transform() with the trained model
-        Console.WriteLine("Using trained model for prediction (placeholder)");
-        return PredictPriority(request);
+        try
+        {
+            var predictionEngine = _mlContext.Model.CreatePredictionEngine<EmailInput, PriorityPrediction>(model);
+            var input = new EmailInput { Subject = request.Subject, Body = request.Body };
+            var prediction = predictionEngine.Predict(input);
+            
+            Console.WriteLine($"ML Prediction: Priority={prediction.Score:F1}");
+            
+            // Use ML for priority, rules for category/sentiment
+            var ruleBased = PredictPriority(request);
+            return new EmailPrediction
+            {
+                PriorityScore = Math.Clamp(prediction.Score, 0, 100),
+                PredictedCategory = ruleBased.PredictedCategory,
+                PredictedSentiment = ruleBased.PredictedSentiment
+            };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ML prediction failed: {ex.Message}, falling back to rules");
+            return PredictPriority(request);
+        }
+    }
+
+    private class EmailInput
+    {
+        public string Subject { get; set; } = "";
+        public string Body { get; set; } = "";
+    }
+
+    private class PriorityPrediction
+    {
+        [ColumnName("Score")]
+        public float Score { get; set; }
     }
 
     private EmailPrediction PredictPriority(EmailInsightsRequest request)
