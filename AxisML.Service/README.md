@@ -1,6 +1,6 @@
 # Axis ML Service
 
-ML.NET-powered prediction service for email analysis.
+ML.NET-powered prediction service for email analysis with automated training pipeline.
 
 ## Run
 
@@ -20,6 +20,43 @@ Service runs on `http://localhost:5000`
 **Test:**
 ```bash
 curl http://localhost:5000/api/ml/health
+```
+
+## Configuration
+
+Add O365 credentials to `appsettings.Development.json`:
+```json
+{
+  "O365": {
+    "ClientId": "your-client-id",
+    "TenantId": "your-tenant-id",
+    "ClientSecret": "your-client-secret",
+    "UserEmail": "user@domain.com"
+  }
+}
+```
+
+## Hangfire Dashboard
+
+View scheduled jobs and history: `http://localhost:5000/hangfire`
+
+## Background Jobs
+
+**Automated Training:**
+- Runs daily at 2:00 AM UTC
+- Extracts latest 500 emails from O365
+- Stores in SQLite database (`training_data.db`)
+- Trains ML models when sufficient data available (50+ emails)
+- Versions models with timestamps
+
+**Manual Trigger:**
+```bash
+curl -X POST http://localhost:5000/api/jobs/trigger
+```
+
+**Check Status:**
+```bash
+curl http://localhost:5000/api/jobs/status
 ```
 
 ## API

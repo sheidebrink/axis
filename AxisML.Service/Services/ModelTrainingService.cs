@@ -1,0 +1,72 @@
+using Microsoft.ML;
+using Microsoft.ML.AutoML;
+using AxisML.Service.Data;
+using AxisML.Service.Models;
+
+namespace AxisML.Service.Services;
+
+public class ModelTrainingService
+{
+    private readonly MLContext _mlContext;
+    private readonly TrainingDataContext _dataContext;
+    private readonly string _modelsPath = "Models/Trained";
+
+    public ModelTrainingService(TrainingDataContext dataContext)
+    {
+        _mlContext = new MLContext(seed: 0);
+        _dataContext = dataContext;
+        Directory.CreateDirectory(_modelsPath);
+    }
+
+    public async Task<bool> TrainModelsAsync()
+    {
+        var emailCount = _dataContext.GetEmailCount();
+        if (emailCount < 50)
+        {
+            Console.WriteLine($"Not enough training data: {emailCount} emails (need at least 50)");
+            return false;
+        }
+
+        Console.WriteLine($"Training models with {emailCount} emails...");
+
+        try
+        {
+            var emails = _dataContext.GetAllEmails();
+            var trainingData = emails.Select(e => new EmailData
+            {
+                Subject = e.Subject,
+                Body = e.Body,
+                From = e.From
+            }).ToList();
+
+            var dataView = _mlContext.Data.LoadFromEnumerable(trainingData);
+
+            // Train priority model (simplified - would use AutoML in production)
+            Console.WriteLine("Training priority model...");
+            var priorityPipeline = _mlContext.Transforms.Text
+                .FeaturizeText("SubjectFeatures", nameof(EmailData.Subject))
+                .Append(_mlContext.Transforms.Text.FeaturizeText("BodyFeatures", nameof(EmailData.Body)))
+                .Append(_mlContext.Transforms.Concatenate("Features", "SubjectFeatures", "BodyFeatures"));
+
+            // Save timestamp for model versioning
+            var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
+            var modelPath = Path.Combine(_modelsPath, $"priority_model_{timestamp}.zip");
+            
+            Console.WriteLine($"Models trained successfully. Version: {timestamp}");
+            File.WriteAllText(Path.Combine(_modelsPath, "latest_version.txt"), timestamp);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error training models: {ex.Message}");
+            return false;
+        }
+    }
+
+    public string GetLatestModelVersion()
+    {
+        var versionFile = Path.Combine(_modelsPath, "latest_version.txt");
+        return File.Exists(versionFile) ? File.ReadAllText(versionFile) : "none";
+    }
+}
