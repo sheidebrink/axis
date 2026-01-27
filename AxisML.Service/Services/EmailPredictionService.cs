@@ -8,25 +8,63 @@ namespace AxisML.Service.Services;
 public class EmailPredictionService
 {
     private readonly MLContext _mlContext;
-    private ITransformer? _priorityModel;
-    private ITransformer? _categoryModel;
-    private ITransformer? _sentimentModel;
+    private readonly string _modelsPath = "Models/Trained";
+    private readonly Dictionary<string, ITransformer> _loadedModels = new();
 
     public EmailPredictionService()
     {
         _mlContext = new MLContext(seed: 0);
-        LoadModels();
     }
 
-    private void LoadModels()
+    private ITransformer? LoadModelForUser(string userEmail)
     {
-        // Models will be loaded from disk after training
-        // For now, we'll use rule-based predictions
+        var sanitizedEmail = SanitizeEmail(userEmail);
+        
+        if (_loadedModels.ContainsKey(sanitizedEmail))
+            return _loadedModels[sanitizedEmail];
+
+        var versionFile = Path.Combine(_modelsPath, $"{sanitizedEmail}_latest.txt");
+        if (!File.Exists(versionFile))
+        {
+            Console.WriteLine($"No trained model found for {userEmail}, using rule-based predictions");
+            return null;
+        }
+
+        var version = File.ReadAllText(versionFile).Trim();
+        var modelPath = Path.Combine(_modelsPath, $"{sanitizedEmail}_{version}.zip");
+        
+        if (!File.Exists(modelPath))
+        {
+            Console.WriteLine($"Model file not found: {modelPath}");
+            return null;
+        }
+
+        try
+        {
+            var model = _mlContext.Model.Load(modelPath, out _);
+            _loadedModels[sanitizedEmail] = model;
+            Console.WriteLine($"Loaded trained model for {userEmail}: {version}");
+            return model;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading model for {userEmail}: {ex.Message}");
+            return null;
+        }
     }
 
-    public EmailInsightsResponse AnalyzeEmail(EmailInsightsRequest request)
+    private string SanitizeEmail(string email)
     {
-        var prediction = PredictPriority(request);
+        return email.Replace("@", "_at_").Replace(".", "_");
+    }
+
+    public EmailInsightsResponse AnalyzeEmail(EmailInsightsRequest request, string userEmail)
+    {
+        var model = LoadModelForUser(userEmail);
+        var prediction = model != null 
+            ? PredictWithModel(request, model) 
+            : PredictPriority(request);
+        
         var entities = ExtractEntities(request);
         var recommendations = GenerateRecommendations(prediction, entities, request);
         
@@ -42,6 +80,14 @@ public class EmailPredictionService
             PredictedCloseDays = PredictCloseDays(prediction),
             FraudIndicators = DetectFraudIndicators(request, entities)
         };
+    }
+
+    private EmailPrediction PredictWithModel(EmailInsightsRequest request, ITransformer model)
+    {
+        // For now, still use rule-based until we implement actual ML prediction
+        // This is where you'd use model.Transform() with the trained model
+        Console.WriteLine("Using trained model for prediction (placeholder)");
+        return PredictPriority(request);
     }
 
     private EmailPrediction PredictPriority(EmailInsightsRequest request)

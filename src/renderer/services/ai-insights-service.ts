@@ -28,8 +28,9 @@ class AIInsightsService {
 
   async analyzeEmail(emailId: string, subject: string, body: string, from: string): Promise<EmailInsights> {
     try {
+      const userEmail = 'janustest@cb-sisco.com';
       // Try ML service first
-      const response = await fetch(`${this.mlServiceUrl}/analyze`, {
+      const response = await fetch(`${this.mlServiceUrl}/analyze?userEmail=${encodeURIComponent(userEmail)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ emailId, subject, body, from }),

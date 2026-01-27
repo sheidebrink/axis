@@ -21,6 +21,7 @@ public class TrainingDataContext
         command.CommandText = @"
             CREATE TABLE IF NOT EXISTS EmailTrainingData (
                 Id TEXT PRIMARY KEY,
+                UserEmail TEXT NOT NULL,
                 Subject TEXT,
                 Body TEXT,
                 FromAddress TEXT,
@@ -31,9 +32,13 @@ public class TrainingDataContext
                 ExtractedAt TEXT
             )";
         command.ExecuteNonQuery();
+
+        // Create index on UserEmail for faster queries
+        command.CommandText = "CREATE INDEX IF NOT EXISTS idx_user_email ON EmailTrainingData(UserEmail)";
+        command.ExecuteNonQuery();
     }
 
-    public void SaveEmail(string id, string subject, string body, string from, DateTime received)
+    public void SaveEmail(string userEmail, string id, string subject, string body, string from, DateTime received)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
@@ -41,10 +46,11 @@ public class TrainingDataContext
         var command = connection.CreateCommand();
         command.CommandText = @"
             INSERT OR REPLACE INTO EmailTrainingData 
-            (Id, Subject, Body, FromAddress, ReceivedDateTime, ExtractedAt)
-            VALUES ($id, $subject, $body, $from, $received, $extracted)";
+            (Id, UserEmail, Subject, Body, FromAddress, ReceivedDateTime, ExtractedAt)
+            VALUES ($id, $userEmail, $subject, $body, $from, $received, $extracted)";
         
         command.Parameters.AddWithValue("$id", id);
+        command.Parameters.AddWithValue("$userEmail", userEmail);
         command.Parameters.AddWithValue("$subject", subject ?? "");
         command.Parameters.AddWithValue("$body", body ?? "");
         command.Parameters.AddWithValue("$from", from ?? "");
@@ -54,7 +60,7 @@ public class TrainingDataContext
         command.ExecuteNonQuery();
     }
 
-    public List<(string Subject, string Body, string From)> GetAllEmails()
+    public List<(string Subject, string Body, string From)> GetAllEmails(string userEmail)
     {
         var emails = new List<(string, string, string)>();
         
@@ -62,7 +68,8 @@ public class TrainingDataContext
         connection.Open();
 
         var command = connection.CreateCommand();
-        command.CommandText = "SELECT Subject, Body, FromAddress FROM EmailTrainingData";
+        command.CommandText = "SELECT Subject, Body, FromAddress FROM EmailTrainingData WHERE UserEmail = $userEmail";
+        command.Parameters.AddWithValue("$userEmail", userEmail);
         
         using var reader = command.ExecuteReader();
         while (reader.Read())
@@ -77,13 +84,14 @@ public class TrainingDataContext
         return emails;
     }
 
-    public int GetEmailCount()
+    public int GetEmailCount(string userEmail)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
         var command = connection.CreateCommand();
-        command.CommandText = "SELECT COUNT(*) FROM EmailTrainingData";
+        command.CommandText = "SELECT COUNT(*) FROM EmailTrainingData WHERE UserEmail = $userEmail";
+        command.Parameters.AddWithValue("$userEmail", userEmail);
         
         return Convert.ToInt32(command.ExecuteScalar());
     }

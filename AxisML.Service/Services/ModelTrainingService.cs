@@ -18,20 +18,20 @@ public class ModelTrainingService
         Directory.CreateDirectory(_modelsPath);
     }
 
-    public async Task<bool> TrainModelsAsync()
+    public async Task<bool> TrainModelsAsync(string userEmail)
     {
-        var emailCount = _dataContext.GetEmailCount();
+        var emailCount = _dataContext.GetEmailCount(userEmail);
         if (emailCount < 50)
         {
-            Console.WriteLine($"Not enough training data: {emailCount} emails (need at least 50)");
+            Console.WriteLine($"Not enough training data for {userEmail}: {emailCount} emails (need at least 50)");
             return false;
         }
 
-        Console.WriteLine($"Training models with {emailCount} emails...");
+        Console.WriteLine($"Training models for {userEmail} with {emailCount} emails...");
 
         try
         {
-            var emails = _dataContext.GetAllEmails();
+            var emails = _dataContext.GetAllEmails(userEmail);
             var trainingData = emails.Select(e => new EmailData
             {
                 Subject = e.Subject,
@@ -50,10 +50,10 @@ public class ModelTrainingService
 
             // Save timestamp for model versioning
             var timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-            var modelPath = Path.Combine(_modelsPath, $"priority_model_{timestamp}.zip");
+            var modelPath = Path.Combine(_modelsPath, $"{SanitizeEmail(userEmail)}_{timestamp}.zip");
             
             Console.WriteLine($"Models trained successfully. Version: {timestamp}");
-            File.WriteAllText(Path.Combine(_modelsPath, "latest_version.txt"), timestamp);
+            File.WriteAllText(Path.Combine(_modelsPath, $"{SanitizeEmail(userEmail)}_latest.txt"), timestamp);
 
             return true;
         }
@@ -64,9 +64,14 @@ public class ModelTrainingService
         }
     }
 
-    public string GetLatestModelVersion()
+    public string GetLatestModelVersion(string userEmail)
     {
-        var versionFile = Path.Combine(_modelsPath, "latest_version.txt");
+        var versionFile = Path.Combine(_modelsPath, $"{SanitizeEmail(userEmail)}_latest.txt");
         return File.Exists(versionFile) ? File.ReadAllText(versionFile) : "none";
+    }
+
+    private string SanitizeEmail(string email)
+    {
+        return email.Replace("@", "_at_").Replace(".", "_");
     }
 }

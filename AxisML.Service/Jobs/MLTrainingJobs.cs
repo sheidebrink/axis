@@ -48,18 +48,18 @@ public class MLTrainingJobs
             Console.WriteLine("Saving to database...");
             foreach (var email in emails)
             {
-                _dataContext.SaveEmail(email.Id, email.Subject, email.Body, email.From, email.Received);
+                _dataContext.SaveEmail(userEmail, email.Id, email.Subject, email.Body, email.From, email.Received);
             }
 
-            var totalEmails = _dataContext.GetEmailCount();
-            Console.WriteLine($"✓ Total emails in database: {totalEmails}");
+            var totalEmails = _dataContext.GetEmailCount(userEmail);
+            Console.WriteLine($"✓ Total emails in database for {userEmail}: {totalEmails}");
 
             // Train models
             Console.WriteLine("Starting model training...");
-            var success = await _trainingService.TrainModelsAsync();
+            var success = await _trainingService.TrainModelsAsync(userEmail);
             if (success)
             {
-                var version = _trainingService.GetLatestModelVersion();
+                var version = _trainingService.GetLatestModelVersion(userEmail);
                 Console.WriteLine($"✓ Training completed. Model version: {version}");
             }
             else

@@ -12,11 +12,13 @@ public class JobsController : ControllerBase
 {
     private readonly TrainingDataContext _dataContext;
     private readonly ModelTrainingService _trainingService;
+    private readonly IConfiguration _configuration;
 
-    public JobsController(TrainingDataContext dataContext, ModelTrainingService trainingService)
+    public JobsController(TrainingDataContext dataContext, ModelTrainingService trainingService, IConfiguration configuration)
     {
         _dataContext = dataContext;
         _trainingService = trainingService;
+        _configuration = configuration;
     }
 
     [HttpPost("trigger")]
@@ -29,11 +31,13 @@ public class JobsController : ControllerBase
     [HttpGet("status")]
     public IActionResult GetStatus()
     {
-        var emailCount = _dataContext.GetEmailCount();
-        var modelVersion = _trainingService.GetLatestModelVersion();
+        var userEmail = _configuration["O365:UserEmail"] ?? "unknown";
+        var emailCount = _dataContext.GetEmailCount(userEmail);
+        var modelVersion = _trainingService.GetLatestModelVersion(userEmail);
 
         return Ok(new
         {
+            userEmail,
             trainingDataCount = emailCount,
             latestModelVersion = modelVersion,
             nextScheduledRun = "Daily at 2:00 AM UTC"

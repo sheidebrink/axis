@@ -16,9 +16,14 @@ public class MLController : ControllerBase
     }
 
     [HttpPost("analyze")]
-    public ActionResult<EmailInsightsResponse> AnalyzeEmail([FromBody] EmailInsightsRequest request)
+    public ActionResult<EmailInsightsResponse> AnalyzeEmail([FromBody] EmailInsightsRequest request, [FromQuery] string? userEmail = null)
     {
-        var insights = _predictionService.AnalyzeEmail(request);
+        if (string.IsNullOrEmpty(userEmail))
+        {
+            return BadRequest(new { error = "userEmail query parameter is required" });
+        }
+        
+        var insights = _predictionService.AnalyzeEmail(request, userEmail);
         return Ok(insights);
     }
 
