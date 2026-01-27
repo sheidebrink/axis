@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "DYsZWDlvc0E=",
+  "dgSpecHash": "bT1iF4nThSw=",
   "success": true,
-  "projectFilePath": "c:\\src\\axis\\AxisML.Service\\AxisML.Service.csproj",
+  "projectFilePath": "C:\\src\\axis\\AxisML.Service\\AxisML.Service.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\sheidebr\\.nuget\\packages\\azure.core\\1.44.1\\azure.core.1.44.1.nupkg.sha512",
     "C:\\Users\\sheidebr\\.nuget\\packages\\azure.identity\\1.13.0\\azure.identity.1.13.0.nupkg.sha512",

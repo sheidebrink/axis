@@ -24,6 +24,23 @@ const EmailPanel: React.FC<EmailPanelProps> = ({ panelId }) => {
   const [composeBody, setComposeBody] = useState('');
   const [sending, setSending] = useState(false);
   const [selectedPriority, setSelectedPriority] = useState<Record<string, string>>({});
+  const [filter, setFilter] = useState<'all' | 'high-priority' | 'needs-response' | 'unread'>('all');
+
+  const filteredMessages = messages.filter(msg => {
+    if (filter === 'high-priority') {
+      // Show emails tagged as High or with urgent keywords
+      return selectedPriority[msg.id] === 'High' || 
+             msg.subject.toLowerCase().includes('urgent') ||
+             msg.subject.toLowerCase().includes('attorney');
+    }
+    if (filter === 'needs-response') {
+      return !msg.isRead;
+    }
+    if (filter === 'unread') {
+      return !msg.isRead;
+    }
+    return true;
+  });
 
   const handleSetPriority = async (messageId: string, priority: 'High' | 'Medium' | 'Low') => {
     try {
@@ -131,7 +148,27 @@ const EmailPanel: React.FC<EmailPanelProps> = ({ panelId }) => {
             <button onClick={loadMessages}>Refresh</button>
           </div>
         </div>
-        {messages.map(msg => (
+        <div style={styles.filterBar}>
+          <button 
+            style={{ ...styles.filterButton, ...(filter === 'all' ? styles.filterActive : {}) }}
+            onClick={() => setFilter('all')}
+          >
+            All ({messages.length})
+          </button>
+          <button 
+            style={{ ...styles.filterButton, ...(filter === 'high-priority' ? styles.filterActive : {}) }}
+            onClick={() => setFilter('high-priority')}
+          >
+            🔴 High Priority
+          </button>
+          <button 
+            style={{ ...styles.filterButton, ...(filter === 'unread' ? styles.filterActive : {}) }}
+            onClick={() => setFilter('unread')}
+          >
+            Unread ({messages.filter(m => !m.isRead).length})
+          </button>
+        </div>
+        {filteredMessages.map(msg => (
           <div
             key={msg.id}
             style={{
@@ -428,6 +465,27 @@ const styles: Record<string, React.CSSProperties> = {
   priorityLow: {
     background: '#4a4',
     borderColor: '#4a4',
+  },
+  filterBar: {
+    display: 'flex',
+    gap: 8,
+    padding: '12px 16px',
+    borderBottom: '1px solid #333',
+    overflowX: 'auto',
+  },
+  filterButton: {
+    padding: '6px 12px',
+    background: '#2d2d2d',
+    border: '1px solid #444',
+    color: '#fff',
+    fontSize: 12,
+    borderRadius: 4,
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+  },
+  filterActive: {
+    background: '#094771',
+    borderColor: '#0e639c',
   },
 };
 
