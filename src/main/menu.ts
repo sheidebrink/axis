@@ -38,6 +38,18 @@ export function createApplicationMenu(mainWindow: BrowserWindow) {
       ],
     },
     {
+      label: 'Tasks',
+      submenu: [
+        {
+          label: 'Open',
+          accelerator: 'CmdOrCtrl+T',
+          click: () => {
+            mainWindow.webContents.send('open-panel', 'native-tasks');
+          },
+        },
+      ],
+    },
+    {
       label: 'View',
       submenu: [
         {

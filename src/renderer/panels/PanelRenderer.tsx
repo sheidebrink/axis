@@ -9,14 +9,16 @@ const nativeComponents: Record<string, React.LazyExoticComponent<any>> = {
   notes: lazy(() => import('./NotesPanel')),
   email: lazy(() => import('./EmailPanel')),
   browser: lazy(() => import('./BrowserPanel')),
+  tasks: lazy(() => import('./TasksPanel')),
 };
 
 interface PanelRendererProps {
   config: PanelConfig;
   panelId: string;
+  api?: any;
 }
 
-export const PanelRenderer: React.FC<PanelRendererProps> = ({ config, panelId }) => {
+export const PanelRenderer: React.FC<PanelRendererProps> = ({ config, panelId, api }) => {
   if (config.type === 'webview') {
     return <WebviewPanel config={config} panelId={panelId} />;
   }
@@ -28,7 +30,7 @@ export const PanelRenderer: React.FC<PanelRendererProps> = ({ config, panelId })
     }
     return (
       <Suspense fallback={<div>Loading...</div>}>
-        <Component panelId={panelId} config={config} />
+        <Component panelId={panelId} config={config} api={api} />
       </Suspense>
     );
   }

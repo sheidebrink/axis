@@ -8,3 +8,13 @@ Thumbs.db
 .env
 .env.local
 settings.json
+
+# .NET / C# build artifacts
+AxisML.Service/bin/
+AxisML.Service/obj/
+AxisML.Service/*.db
+AxisML.Service/*.db-shm
+AxisML.Service/*.db-wal
+AxisML.Service/Models/Trained/*.zip
+AxisML.Service/Models/Trained/*.txt
+AxisML.Service/appsettings.Development.json

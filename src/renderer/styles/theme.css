@@ -103,6 +103,39 @@ input::placeholder, textarea::placeholder {
   background: #2d2d2d;
 }
 
+/* Dockview panel actions (collapse/expand buttons) */
+.dockview-theme-dark .dv-default-tab-action {
+  color: #cccccc;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.dockview-theme-dark .dv-default-tab-action:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Collapsed panel styling */
+.dockview-theme-dark .dv-group-view.collapsed {
+  background: #252526;
+}
+
+/* Panel header actions container */
+.dockview-theme-dark .actions-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Hide tab header when panel is collapsed */
+.dockview-theme-dark .dv-group-view:has(.panel-collapsed) .tabs-and-actions-container {
+  display: none !important;
+}
+
+.dockview-theme-dark .dv-group-view:has(.panel-collapsed) .content-container {
+  height: 100% !important;
+}
+
 /* Selection */
 ::selection {
   background: #0e639c;

@@ -76,6 +76,20 @@ export async function initializeAxis() {
     metadata: { defaultUrl: cbcsUrl },
   });
 
+  panelRegistry.register({
+    id: 'native-tasks',
+    type: 'native',
+    component: 'tasks',
+    title: 'Tasks',
+    icon: '✓',
+    capabilities: {
+      canReadContext: false,
+      canWriteContext: false,
+      canEmitEvents: false,
+      canReceiveEvents: false,
+    },
+  });
+
   // Register plugins
   await pluginManager.register(analyticsManifest);
 }

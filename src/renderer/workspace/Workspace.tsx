@@ -14,6 +14,7 @@ export const Workspace: React.FC = () => {
   const dockviewRef = useRef<DockviewReadyEvent | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [collapsedPanels, setCollapsedPanels] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     console.log('isReady changed:', isReady);
@@ -34,6 +35,21 @@ export const Workspace: React.FC = () => {
         panelFocusManager.recordFocus(panel.id);
         eventBus.emit('panel.focused', { panelId: panel.id });
       }
+    });
+
+    // Listen for panel collapse events
+    const unsubscribeCollapse = eventBus.on('panel.collapsed' as any, (payload: any) => {
+      console.log('Workspace received panel.collapsed:', payload);
+      setCollapsedPanels(prev => {
+        const next = new Set(prev);
+        if (payload.collapsed) {
+          next.add(payload.panelId);
+        } else {
+          next.delete(payload.panelId);
+        }
+        console.log('Updated collapsed panels:', Array.from(next));
+        return next;
+      });
     });
 
     // Listen for panel creation
@@ -77,6 +93,7 @@ export const Workspace: React.FC = () => {
     return () => {
       disposable.dispose();
       unsubscribe();
+      unsubscribeCollapse();
     };
   }, [isReady]);
 
@@ -208,17 +225,27 @@ export const Workspace: React.FC = () => {
             <PanelRenderer
               config={props.params.config}
               panelId={props.api.id}
+              api={props.api}
             />
           ),
         }}
         tabComponents={{
-          tab: (props) => (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              {props.params.config.icon && <span>{props.params.config.icon}</span>}
-              <span>{props.params.config.title}</span>
-            </div>
-          ),
+          tab: (props) => {
+            const isCollapsed = collapsedPanels.has(props.api.id);
+            console.log('Rendering tab for', props.api.id, 'collapsed:', isCollapsed);
+            return (
+              <div style={{ 
+                display: isCollapsed ? 'none' : 'flex',
+                alignItems: 'center', 
+                gap: 6,
+              }}>
+                {props.params.config.icon && <span>{props.params.config.icon}</span>}
+                <span>{props.params.config.title}</span>
+              </div>
+            );
+          },
         }}
+        watermarkComponent={() => null}
         className="dockview-theme-dark"
       />
       <CommandPalette isOpen={paletteOpen} onClose={() => setPaletteOpen(false)} />
